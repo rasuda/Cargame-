@@ -13,6 +13,8 @@ const KEY_TO_CONTROL: Record<string, Control> = {
 
 export class InputController {
   private readonly active = new Set<Control>();
+  private readonly debugEvents: string[] = [];
+  private readonly inputMode = navigator.maxTouchPoints > 0 ? "touch" : "pointer";
   private resetRequested = false;
 
   constructor() {
@@ -31,6 +33,7 @@ export class InputController {
           for (const touch of event.changedTouches) touchIds.add(touch.identifier);
           this.active.add(control);
           button.classList.add("active");
+          this.recordEvent(`touchstart ${control} total:${event.touches.length}`);
         };
         const release = (event: TouchEvent) => {
           event.preventDefault();
@@ -39,6 +42,7 @@ export class InputController {
             this.active.delete(control);
             button.classList.remove("active");
           }
+          this.recordEvent(`touchend ${control} total:${event.touches.length}`);
         };
 
         button.addEventListener("touchstart", press, { passive: false });
@@ -47,6 +51,7 @@ export class InputController {
           event.preventDefault();
           touchIds.clear();
           if (control !== "throttle") this.releaseControl(control);
+          this.recordEvent(`touchcancel ${control} total:${event.touches.length}`);
         }, { passive: false });
         button.addEventListener("touchmove", (event) => event.preventDefault(), { passive: false });
         button.addEventListener("contextmenu", (event) => event.preventDefault());
@@ -59,15 +64,18 @@ export class InputController {
         button.setPointerCapture(event.pointerId);
         this.active.add(control);
         button.classList.add("active");
+        this.recordEvent(`pointerdown ${control} type:${event.pointerType}`);
       };
       const release = (event: PointerEvent) => {
         event.preventDefault();
         this.active.delete(control);
         button.classList.remove("active");
+        this.recordEvent(`pointerup ${control} type:${event.pointerType}`);
       };
       const cancel = (event: PointerEvent) => {
         event.preventDefault();
         if (control !== "throttle") this.releaseControl(control);
+        this.recordEvent(`pointercancel ${control} type:${event.pointerType}`);
       };
       button.addEventListener("pointerdown", press);
       button.addEventListener("pointerup", release);
@@ -96,6 +104,17 @@ export class InputController {
     const requested = this.resetRequested;
     this.resetRequested = false;
     return requested;
+  }
+
+  get debugText(): string {
+    const active = [...this.active].join(",") || "nenhum";
+    return [
+      `entrada: ${this.inputMode} | toques: ${navigator.maxTouchPoints}`,
+      `ativos: ${active}`,
+      `T:${this.throttle} B:${this.brake} S:${this.steering}`,
+      `página: ${document.visibilityState}`,
+      ...this.debugEvents,
+    ].join("\n");
   }
 
   dispose(): void {
@@ -129,11 +148,17 @@ export class InputController {
   };
 
   private readonly onVisibilityChange = (): void => {
+    this.recordEvent(`visibility ${document.visibilityState}`);
     if (document.hidden) this.releaseAll();
   };
 
   private releaseControl(control: Control): void {
     this.active.delete(control);
     document.querySelector<HTMLButtonElement>(`[data-control="${control}"]`)?.classList.remove("active");
+  }
+
+  private recordEvent(message: string): void {
+    this.debugEvents.unshift(`${Math.round(performance.now())}ms ${message}`);
+    this.debugEvents.length = Math.min(this.debugEvents.length, 4);
   }
 }
