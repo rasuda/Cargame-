@@ -41,6 +41,7 @@ export class Game {
     const speedElement = document.querySelector<HTMLSpanElement>("#speed");
     const instructions = document.querySelector<HTMLDivElement>("#instructions");
     const loading = document.querySelector<HTMLDivElement>("#loading");
+    const debugPanel = document.querySelector<HTMLPreElement>("#debug-panel");
 
     scene.onBeforeRenderObservable.add(() => {
       const delta = Math.min(this.engine.getDeltaTime() / 1000, 1 / 20);
@@ -57,6 +58,14 @@ export class Game {
 
       const speed = metersPerSecondToKmh(car.forwardSpeed);
       if (speedElement) speedElement.textContent = String(speed);
+      if (debugPanel) {
+        const position = car.mesh.position;
+        debugPanel.textContent = [
+          this.input.debugText,
+          `velocidade: ${car.forwardSpeed.toFixed(3)} m/s`,
+          `posição: ${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`,
+        ].join("\n");
+      }
       if (!this.hasDriven && (this.input.throttle > 0 || this.input.brake > 0)) {
         this.hasDriven = true;
         instructions?.classList.add("hidden");
