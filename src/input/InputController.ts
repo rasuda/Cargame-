@@ -18,10 +18,36 @@ export class InputController {
   constructor() {
     window.addEventListener("keydown", this.onKeyDown, { passive: false });
     window.addEventListener("keyup", this.onKeyUp);
-    window.addEventListener("blur", this.releaseAll);
+    document.addEventListener("visibilitychange", this.onVisibilityChange);
 
     document.querySelectorAll<HTMLButtonElement>("[data-control]").forEach((button) => {
       const control = button.dataset.control as Control;
+
+      if (navigator.maxTouchPoints > 0) {
+        const touchIds = new Set<number>();
+        const press = (event: TouchEvent) => {
+          event.preventDefault();
+          for (const touch of event.changedTouches) touchIds.add(touch.identifier);
+          this.active.add(control);
+          button.classList.add("active");
+        };
+        const release = (event: TouchEvent) => {
+          event.preventDefault();
+          for (const touch of event.changedTouches) touchIds.delete(touch.identifier);
+          if (touchIds.size === 0) {
+            this.active.delete(control);
+            button.classList.remove("active");
+          }
+        };
+
+        button.addEventListener("touchstart", press, { passive: false });
+        button.addEventListener("touchend", release, { passive: false });
+        button.addEventListener("touchcancel", release, { passive: false });
+        button.addEventListener("touchmove", (event) => event.preventDefault(), { passive: false });
+        button.addEventListener("contextmenu", (event) => event.preventDefault());
+        return;
+      }
+
       const press = (event: PointerEvent) => {
         event.preventDefault();
         button.setPointerCapture(event.pointerId);
@@ -65,7 +91,7 @@ export class InputController {
   dispose(): void {
     window.removeEventListener("keydown", this.onKeyDown);
     window.removeEventListener("keyup", this.onKeyUp);
-    window.removeEventListener("blur", this.releaseAll);
+    document.removeEventListener("visibilitychange", this.onVisibilityChange);
   }
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
@@ -87,5 +113,12 @@ export class InputController {
 
   private readonly releaseAll = (): void => {
     this.active.clear();
+    document.querySelectorAll<HTMLButtonElement>("[data-control]").forEach((button) => {
+      button.classList.remove("active");
+    });
+  };
+
+  private readonly onVisibilityChange = (): void => {
+    if (document.hidden) this.releaseAll();
   };
 }
