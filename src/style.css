@@ -163,7 +163,7 @@ body { background: radial-gradient(circle at 50% 30%, #334155, #0f172a); }
 
 @media (max-width: 640px) {
   .brand { font-size: 10px; }
-  .brand span { display: none; }
+  .brand span { margin-left: 4px; font-size: 7px; }
   .telemetry { min-width: 78px; padding-inline: 10px; }
   .telemetry span { font-size: 23px; }
   .control-group button { width: 61px; height: 61px; border-radius: 16px; }
