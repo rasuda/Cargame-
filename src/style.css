@@ -111,6 +111,26 @@ body { background: radial-gradient(circle at 50% 30%, #334155, #0f172a); }
 #instructions span { color: #cbd5e1; font-size: 11px; }
 #instructions.hidden { opacity: 0; }
 
+#debug-panel {
+  position: fixed;
+  top: max(68px, calc(env(safe-area-inset-top) + 58px));
+  left: max(12px, env(safe-area-inset-left));
+  width: min(310px, calc(100vw - 24px));
+  min-height: 116px;
+  margin: 0;
+  padding: 9px 11px;
+  overflow: hidden;
+  color: #bbf7d0;
+  border: 1px solid rgb(74 222 128 / 42%);
+  border-radius: 9px;
+  background: rgb(2 6 23 / 78%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 24%);
+  font: 700 9px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  pointer-events: none;
+  z-index: 5;
+}
+
 #touch-controls {
   position: fixed;
   inset: auto max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
