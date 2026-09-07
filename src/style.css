@@ -135,6 +135,7 @@ body { background: radial-gradient(circle at 50% 30%, #334155, #0f172a); }
   pointer-events: auto;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
   backdrop-filter: blur(8px);
 }
 
