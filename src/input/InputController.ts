@@ -27,6 +27,7 @@ export class InputController {
         const touchIds = new Set<number>();
         const press = (event: TouchEvent) => {
           event.preventDefault();
+          if (control === "brake") this.releaseControl("throttle");
           for (const touch of event.changedTouches) touchIds.add(touch.identifier);
           this.active.add(control);
           button.classList.add("active");
@@ -42,7 +43,11 @@ export class InputController {
 
         button.addEventListener("touchstart", press, { passive: false });
         button.addEventListener("touchend", release, { passive: false });
-        button.addEventListener("touchcancel", release, { passive: false });
+        button.addEventListener("touchcancel", (event) => {
+          event.preventDefault();
+          touchIds.clear();
+          if (control !== "throttle") this.releaseControl(control);
+        }, { passive: false });
         button.addEventListener("touchmove", (event) => event.preventDefault(), { passive: false });
         button.addEventListener("contextmenu", (event) => event.preventDefault());
         return;
@@ -50,6 +55,7 @@ export class InputController {
 
       const press = (event: PointerEvent) => {
         event.preventDefault();
+        if (control === "brake") this.releaseControl("throttle");
         button.setPointerCapture(event.pointerId);
         this.active.add(control);
         button.classList.add("active");
@@ -59,9 +65,13 @@ export class InputController {
         this.active.delete(control);
         button.classList.remove("active");
       };
+      const cancel = (event: PointerEvent) => {
+        event.preventDefault();
+        if (control !== "throttle") this.releaseControl(control);
+      };
       button.addEventListener("pointerdown", press);
       button.addEventListener("pointerup", release);
-      button.addEventListener("pointercancel", release);
+      button.addEventListener("pointercancel", cancel);
       button.addEventListener("contextmenu", (event) => event.preventDefault());
     });
 
@@ -121,4 +131,9 @@ export class InputController {
   private readonly onVisibilityChange = (): void => {
     if (document.hidden) this.releaseAll();
   };
+
+  private releaseControl(control: Control): void {
+    this.active.delete(control);
+    document.querySelector<HTMLButtonElement>(`[data-control="${control}"]`)?.classList.remove("active");
+  }
 }
