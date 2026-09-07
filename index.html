@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#111827" />
+    <meta name="description" content="Protótipo jogável do Crash Circuit" />
+    <title>Crash Circuit — Protótipo</title>
+  </head>
+  <body>
+    <canvas id="game-canvas" aria-label="Crash Circuit"></canvas>
+    <div id="hud">
+      <div class="brand">CRASH CIRCUIT <span>FASE 1</span></div>
+      <div class="telemetry">
+        <span id="speed">0</span>
+        <small>km/h</small>
+      </div>
+      <button id="reset" class="reset" type="button">Reiniciar</button>
+    </div>
+    <div id="instructions">
+      <strong>Dirija e teste a física</strong>
+      <span>WASD ou setas · R reinicia</span>
+    </div>
+    <div id="touch-controls" aria-label="Controles por toque">
+      <div class="control-group steering">
+        <button data-control="left" aria-label="Virar à esquerda">◀</button>
+        <button data-control="right" aria-label="Virar à direita">▶</button>
+      </div>
+      <div class="control-group pedals">
+        <button data-control="brake" class="brake" aria-label="Frear ou dar ré">▼</button>
+        <button data-control="throttle" class="throttle" aria-label="Acelerar">▲</button>
+      </div>
+    </div>
+    <div id="loading">Preparando a pista…</div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
