@@ -42,7 +42,8 @@ export class ArcadeCar {
       PhysicsShapeType.BOX,
       {
         mass: GAME_CONFIG.car.mass,
-        friction: 0.82,
+        // This is a sliding box collider; tire grip is handled by the arcade controller.
+        friction: GAME_CONFIG.car.bodyFriction,
         restitution: 0.08,
       },
       scene,
