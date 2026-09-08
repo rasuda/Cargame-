@@ -1,7 +1,7 @@
 class_name GameHud
 extends Control
 
-const VERSION := "v0.2.4 GODOT"
+const VERSION := "v0.2.5 GODOT"
 
 var title_label: Label
 var speed_label: Label
@@ -10,6 +10,7 @@ var reset_label: Label
 var debug_visible := true
 var control_rects: Dictionary = {}
 var control_panels: Dictionary = {}
+var bottom_control_top := 0.0
 
 
 func _ready() -> void:
@@ -33,6 +34,10 @@ func action_at(point: Vector2) -> String:
 		if control_rects.get(action, Rect2()).has_point(point):
 			return action
 	return ""
+
+
+func is_bottom_control_area(point: Vector2) -> bool:
+	return point.y >= bottom_control_top
 
 
 func set_action_active(action: String, active: bool) -> void:
@@ -104,13 +109,15 @@ func _layout() -> void:
 	var button_size := clampf(viewport_size.x * 0.16, 108.0, 150.0)
 	var gap := clampf(button_size * 0.16, 16.0, 24.0)
 	var bottom := viewport_size.y - margin
+	bottom_control_top = bottom - button_size - gap
 
 	title_label.position = Vector2(margin, margin)
-	title_label.size = Vector2(260, 70)
+	title_label.size = Vector2(170 if viewport_size.x < 700.0 else 260, 70)
 	speed_label.position = Vector2(viewport_size.x * 0.5 - 72, margin)
 	speed_label.size = Vector2(144, 96)
-	reset_label.position = Vector2(viewport_size.x - margin - 132, margin)
-	reset_label.size = Vector2(132, 58)
+	var reset_width := 112.0 if viewport_size.x < 700.0 else 132.0
+	reset_label.position = Vector2(viewport_size.x - margin - reset_width, margin)
+	reset_label.size = Vector2(reset_width, 58)
 	control_rects["reset"] = Rect2(reset_label.position, reset_label.size)
 
 	var left_rect := Rect2(Vector2(margin, bottom - button_size), Vector2.ONE * button_size)

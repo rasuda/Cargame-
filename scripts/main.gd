@@ -62,6 +62,9 @@ func _handle_screen_touch(event: InputEventScreenTouch) -> void:
 			touch_actions[event.index] = action
 			hud.set_action_active(action, true)
 			get_viewport().set_input_as_handled()
+		elif hud.is_bottom_control_area(event.position):
+			# A faixa inferior é exclusiva dos controles e não movimenta a câmera.
+			get_viewport().set_input_as_handled()
 		elif camera_touch == -1:
 			camera_touch = event.index
 			camera_touch_origin = event.position
