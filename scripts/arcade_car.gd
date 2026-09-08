@@ -1,8 +1,8 @@
 class_name ArcadeCar
 extends VehicleBody3D
 
-const MAX_ENGINE_FORCE := 1800.0
-const MAX_BRAKE_FORCE := 90.0
+const MAX_ENGINE_FORCE := 3200.0
+const MAX_BRAKE_FORCE := 110.0
 const MAX_STEERING := deg_to_rad(28.0)
 const STEERING_SPEED := 4.5
 
@@ -36,8 +36,7 @@ func _physics_process(delta: float) -> void:
 
 	engine_force = requested_engine * MAX_ENGINE_FORCE
 	brake = requested_brake * MAX_BRAKE_FORCE
-	# VehicleBody3D usa o sinal oposto ao sentido visual dos controles.
-	steering = move_toward(steering, -steering_input * MAX_STEERING, STEERING_SPEED * delta)
+	steering = move_toward(steering, steering_input * MAX_STEERING, STEERING_SPEED * delta)
 
 	if global_position.y < -8.0 or abs(global_position.x) > 55.0:
 		reset_to_spawn()
@@ -97,8 +96,8 @@ func _build_chassis() -> void:
 
 
 func _build_wheels() -> void:
-	_add_wheel("FrontLeft", Vector3(-1.02, 0.55, 1.36), true, false)
-	_add_wheel("FrontRight", Vector3(1.02, 0.55, 1.36), true, false)
+	_add_wheel("FrontLeft", Vector3(-1.02, 0.55, 1.36), true, true)
+	_add_wheel("FrontRight", Vector3(1.02, 0.55, 1.36), true, true)
 	_add_wheel("RearLeft", Vector3(-1.02, 0.55, -1.36), false, true)
 	_add_wheel("RearRight", Vector3(1.02, 0.55, -1.36), false, true)
 
@@ -116,7 +115,7 @@ func _add_wheel(wheel_name: String, wheel_position: Vector3, steers: bool, drive
 	wheel.suspension_max_force = 7200.0
 	wheel.damping_compression = 0.90
 	wheel.damping_relaxation = 1.15
-	wheel.wheel_friction_slip = 2.1
+	wheel.wheel_friction_slip = 5.0
 	wheel.wheel_roll_influence = 0.08
 	add_child(wheel)
 	wheels.append(wheel)
