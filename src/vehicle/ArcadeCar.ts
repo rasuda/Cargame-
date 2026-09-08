@@ -1,6 +1,7 @@
 import {
   Axis,
   Color3,
+  Matrix,
   Mesh,
   MeshBuilder,
   PhysicsAggregate,
@@ -161,7 +162,9 @@ export class ArcadeCar {
       );
       wheel.parent = this.mesh;
       wheel.position.set(x, y, z);
-      wheel.rotation.z = Math.PI / 2;
+      // Babylon cylinders are created along Y. Bake the 90° orientation into
+      // the geometry so the wheel axle and its runtime rotation are both X.
+      wheel.bakeTransformIntoVertices(Matrix.RotationZ(Math.PI / 2));
       wheel.material = wheelMaterial;
       this.wheelMeshes.push(wheel);
     });
