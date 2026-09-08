@@ -65,6 +65,7 @@ export class Game {
           "propulsão: impulso/quadro",
           `atrito carroceria: ${GAME_CONFIG.car.bodyFriction.toFixed(2)}`,
           "colisor: alinhado aos pneus",
+          "rodas: eixo X",
           `velocidade: ${car.forwardSpeed.toFixed(3)} m/s`,
           `posição: ${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`,
         ].join("\n");
