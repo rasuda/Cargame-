@@ -2,6 +2,7 @@ import HavokPhysics from "@babylonjs/havok";
 import {
   Engine,
   HavokPlugin,
+  Matrix,
   Scene,
   Vector3,
 } from "@babylonjs/core";
@@ -16,13 +17,22 @@ export class Game {
   private scene?: Scene;
   private car?: ArcadeCar;
   private hasDriven = false;
+  private cameraTouchId: number | null = null;
+  private cameraTouchX = 0;
+  private cameraTouchY = 0;
+  private cameraYaw = 0;
+  private cameraHeight: number = GAME_CONFIG.camera.height;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(private readonly canvas: HTMLCanvasElement) {
     this.engine = new Engine(canvas, true, {
       adaptToDeviceRatio: true,
       preserveDrawingBuffer: false,
       stencil: true,
     });
+    this.canvas.addEventListener("touchstart", this.onCameraTouchStart, { passive: false });
+    this.canvas.addEventListener("touchmove", this.onCameraTouchMove, { passive: false });
+    this.canvas.addEventListener("touchend", this.onCameraTouchEnd, { passive: false });
+    this.canvas.addEventListener("touchcancel", this.onCameraTouchEnd, { passive: false });
   }
 
   async start(): Promise<void> {
@@ -49,10 +59,13 @@ export class Game {
 
       if (this.input.consumeReset() || car.mesh.position.y < -8) car.reset();
 
-      const forward = car.mesh.forward.normalize();
+      const forward = Vector3.TransformNormal(
+        car.mesh.forward.normalize(),
+        Matrix.RotationY(this.cameraYaw),
+      );
       const desiredPosition = car.mesh.position
         .subtract(forward.scale(GAME_CONFIG.camera.distance))
-        .add(new Vector3(0, GAME_CONFIG.camera.height, 0));
+        .add(new Vector3(0, this.cameraHeight, 0));
       camera.position.copyFrom(Vector3.Lerp(camera.position, desiredPosition, GAME_CONFIG.camera.smoothing));
       camera.setTarget(car.mesh.position.add(new Vector3(0, 0.65, 0)));
 
@@ -64,8 +77,9 @@ export class Game {
           this.input.debugText,
           "propulsão: impulso/quadro",
           `atrito carroceria: ${GAME_CONFIG.car.bodyFriction.toFixed(2)}`,
-          "colisor: alinhado aos pneus",
+          "apoio: 4 rodas",
           "rodas: eixo X",
+          `câmera: ${Math.round(this.cameraYaw * 180 / Math.PI)}° | ${this.cameraHeight.toFixed(1)}m`,
           `velocidade: ${car.forwardSpeed.toFixed(3)} m/s`,
           `posição: ${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`,
         ].join("\n");
@@ -83,6 +97,10 @@ export class Game {
 
   dispose(): void {
     window.removeEventListener("resize", this.resize);
+    this.canvas.removeEventListener("touchstart", this.onCameraTouchStart);
+    this.canvas.removeEventListener("touchmove", this.onCameraTouchMove);
+    this.canvas.removeEventListener("touchend", this.onCameraTouchEnd);
+    this.canvas.removeEventListener("touchcancel", this.onCameraTouchEnd);
     this.input.dispose();
     this.car?.dispose();
     this.scene?.dispose();
@@ -90,4 +108,36 @@ export class Game {
   }
 
   private readonly resize = (): void => this.engine.resize();
+
+  private readonly onCameraTouchStart = (event: TouchEvent): void => {
+    if (this.cameraTouchId !== null) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    event.preventDefault();
+    this.cameraTouchId = touch.identifier;
+    this.cameraTouchX = touch.clientX;
+    this.cameraTouchY = touch.clientY;
+  };
+
+  private readonly onCameraTouchMove = (event: TouchEvent): void => {
+    if (this.cameraTouchId === null) return;
+    const touch = Array.from(event.changedTouches).find(({ identifier }) => identifier === this.cameraTouchId);
+    if (!touch) return;
+    event.preventDefault();
+
+    const deltaX = touch.clientX - this.cameraTouchX;
+    const deltaY = touch.clientY - this.cameraTouchY;
+    this.cameraYaw -= deltaX * 0.008;
+    this.cameraHeight = Math.max(1.8, Math.min(9, this.cameraHeight + deltaY * 0.018));
+    this.cameraTouchX = touch.clientX;
+    this.cameraTouchY = touch.clientY;
+  };
+
+  private readonly onCameraTouchEnd = (event: TouchEvent): void => {
+    if (this.cameraTouchId === null) return;
+    const ended = Array.from(event.changedTouches).some(({ identifier }) => identifier === this.cameraTouchId);
+    if (!ended) return;
+    event.preventDefault();
+    this.cameraTouchId = null;
+  };
 }
