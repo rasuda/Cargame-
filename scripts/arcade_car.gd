@@ -1,8 +1,8 @@
 class_name ArcadeCar
 extends VehicleBody3D
 
-const MAX_ENGINE_FORCE := 78.0
-const MAX_BRAKE_FORCE := 34.0
+const MAX_ENGINE_FORCE := 1800.0
+const MAX_BRAKE_FORCE := 90.0
 const MAX_STEERING := deg_to_rad(28.0)
 const STEERING_SPEED := 4.5
 
@@ -36,7 +36,8 @@ func _physics_process(delta: float) -> void:
 
 	engine_force = requested_engine * MAX_ENGINE_FORCE
 	brake = requested_brake * MAX_BRAKE_FORCE
-	steering = move_toward(steering, steering_input * MAX_STEERING, STEERING_SPEED * delta)
+	# VehicleBody3D usa o sinal oposto ao sentido visual dos controles.
+	steering = move_toward(steering, -steering_input * MAX_STEERING, STEERING_SPEED * delta)
 
 	if global_position.y < -8.0 or abs(global_position.x) > 55.0:
 		reset_to_spawn()
