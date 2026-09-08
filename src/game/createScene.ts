@@ -28,12 +28,15 @@ function makeStaticBox(
   position: Vector3,
   boxMaterial: StandardMaterial,
   rotationX = 0,
+  collidable = true,
 ): Mesh {
   const box = MeshBuilder.CreateBox(name, size, scene);
   box.position.copyFrom(position);
   box.rotation.x = rotationX;
   box.material = boxMaterial;
-  new PhysicsAggregate(box, PhysicsShapeType.BOX, { mass: 0, friction: 0.9, restitution: 0.05 }, scene);
+  if (collidable) {
+    new PhysicsAggregate(box, PhysicsShapeType.BOX, { mass: 0, friction: 0.9, restitution: 0.05 }, scene);
+  }
   return box;
 }
 
@@ -71,14 +74,30 @@ export function createScene(scene: Scene): { camera: FreeCamera; shadow: ShadowG
   makeStaticBox(scene, "cross-road", { width: 95, height: 0.2, depth: 16 }, new Vector3(0, 0.02, 32), asphalt);
 
   for (let z = -38; z <= 64; z += 8) {
-    makeStaticBox(scene, `lane-${z}`, { width: 0.18, height: 0.025, depth: 4.2 }, new Vector3(0, 0.13, z), white);
+    makeStaticBox(
+      scene,
+      `lane-${z}`,
+      { width: 0.18, height: 0.008, depth: 4.2 },
+      new Vector3(0, 0.098, z),
+      white,
+      0,
+      false,
+    );
   }
 
   for (let x = -42; x <= 42; x += 8) {
-    makeStaticBox(scene, `cross-lane-${x}`, { width: 4.2, height: 0.025, depth: 0.18 }, new Vector3(x, 0.15, 32), white);
+    makeStaticBox(
+      scene,
+      `cross-lane-${x}`,
+      { width: 4.2, height: 0.008, depth: 0.18 },
+      new Vector3(x, 0.124, 32),
+      white,
+      0,
+      false,
+    );
   }
 
-  makeStaticBox(scene, "ramp", { width: 5.3, height: 0.7, depth: 8 }, new Vector3(0, 0.42, 17), concrete, -0.1);
+  makeStaticBox(scene, "ramp", { width: 5.3, height: 0.7, depth: 8 }, new Vector3(0, 0.14, 17), concrete, -0.1);
 
   const barriers = [
     [-5.9, 0.65, 21], [5.9, 0.65, 21], [-5.9, 0.65, 27], [5.9, 0.65, 27],
