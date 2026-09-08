@@ -26,14 +26,17 @@ export class ArcadeCar {
 
   constructor(scene: Scene, input: InputController) {
     this.input = input;
-    this.mesh = MeshBuilder.CreateBox("player-car", { width: 2.05, height: 0.72, depth: 4.25 }, scene);
+    this.mesh = MeshBuilder.CreateBox(
+      "player-car-collider",
+      { width: 1.9, height: 0.82, depth: 4.05 },
+      scene,
+    );
     this.mesh.position.set(GAME_CONFIG.spawn.x, GAME_CONFIG.spawn.y, GAME_CONFIG.spawn.z);
     this.mesh.rotationQuaternion = Quaternion.Identity();
 
-    const bodyMaterial = new StandardMaterial("car-body-material", scene);
-    bodyMaterial.diffuseColor = Color3.FromHexString("#f05a28");
-    bodyMaterial.specularColor = new Color3(0.55, 0.55, 0.55);
-    this.mesh.material = bodyMaterial;
+    const colliderMaterial = new StandardMaterial("car-collider-material", scene);
+    colliderMaterial.alpha = 0;
+    this.mesh.material = colliderMaterial;
 
     this.createVisualDetails(scene);
 
@@ -121,9 +124,21 @@ export class ArcadeCar {
   }
 
   private createVisualDetails(scene: Scene): void {
+    const body = MeshBuilder.CreateBox(
+      "player-car-body",
+      { width: 2.05, height: 0.72, depth: 4.25 },
+      scene,
+    );
+    body.parent = this.mesh;
+    body.position.y = 0.3;
+    const bodyMaterial = new StandardMaterial("car-body-material", scene);
+    bodyMaterial.diffuseColor = Color3.FromHexString("#f05a28");
+    bodyMaterial.specularColor = new Color3(0.55, 0.55, 0.55);
+    body.material = bodyMaterial;
+
     const glass = MeshBuilder.CreateBox("car-cabin", { width: 1.72, height: 0.58, depth: 1.85 }, scene);
     glass.parent = this.mesh;
-    glass.position.set(0, 0.58, -0.2);
+    glass.position.set(0, 0.88, -0.2);
     const glassMaterial = new StandardMaterial("car-glass-material", scene);
     glassMaterial.diffuseColor = Color3.FromHexString("#172033");
     glassMaterial.specularColor = new Color3(0.9, 0.9, 0.95);
@@ -132,10 +147,10 @@ export class ArcadeCar {
     const wheelMaterial = new StandardMaterial("wheel-material", scene);
     wheelMaterial.diffuseColor = new Color3(0.035, 0.035, 0.045);
     const positions = [
-      [-1.05, -0.25, 1.35],
-      [1.05, -0.25, 1.35],
-      [-1.05, -0.25, -1.35],
-      [1.05, -0.25, -1.35],
+      [-1.05, 0, 1.35],
+      [1.05, 0, 1.35],
+      [-1.05, 0, -1.35],
+      [1.05, 0, -1.35],
     ] as const;
 
     positions.forEach(([x, y, z], index) => {
