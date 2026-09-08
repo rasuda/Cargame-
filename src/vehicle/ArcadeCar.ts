@@ -6,7 +6,10 @@ import {
   MeshBuilder,
   PhysicsAggregate,
   PhysicsPrestepType,
-  PhysicsShapeType,
+  PhysicsShape,
+  PhysicsShapeBox,
+  PhysicsShapeContainer,
+  PhysicsShapeCylinder,
   Quaternion,
   Scene,
   StandardMaterial,
@@ -24,6 +27,8 @@ export class ArcadeCar {
   private readonly velocity = Vector3.Zero();
   private readonly angularVelocity = Vector3.Zero();
   private readonly wheelMeshes: Mesh[] = [];
+  private readonly collisionShapes: PhysicsShape[] = [];
+  private readonly collisionContainer: PhysicsShapeContainer;
 
   constructor(scene: Scene, input: InputController) {
     this.input = input;
@@ -41,9 +46,36 @@ export class ArcadeCar {
 
     this.createVisualDetails(scene);
 
+    this.collisionContainer = new PhysicsShapeContainer(scene);
+    const wheelPositions = [
+      [-1.05, 0, 1.35],
+      [1.05, 0, 1.35],
+      [-1.05, 0, -1.35],
+      [1.05, 0, -1.35],
+    ] as const;
+    for (const [x, y, z] of wheelPositions) {
+      const wheelShape = new PhysicsShapeCylinder(
+        new Vector3(-0.17, 0, 0),
+        new Vector3(0.17, 0, 0),
+        0.41,
+        scene,
+      );
+      this.collisionContainer.addChild(wheelShape, new Vector3(x, y, z));
+      this.collisionShapes.push(wheelShape);
+    }
+
+    const chassisShape = new PhysicsShapeBox(
+      new Vector3(0, 0.3, 0),
+      Quaternion.Identity(),
+      new Vector3(1.9, 0.48, 3.9),
+      scene,
+    );
+    this.collisionContainer.addChild(chassisShape);
+    this.collisionShapes.push(chassisShape);
+
     this.physics = new PhysicsAggregate(
       this.mesh,
-      PhysicsShapeType.BOX,
+      this.collisionContainer,
       {
         mass: GAME_CONFIG.car.mass,
         // This is a sliding box collider; tire grip is handled by the arcade controller.
@@ -121,6 +153,8 @@ export class ArcadeCar {
 
   dispose(): void {
     this.physics.dispose();
+    this.collisionContainer.dispose();
+    for (const shape of this.collisionShapes) shape.dispose();
     this.mesh.dispose(false, true);
   }
 
