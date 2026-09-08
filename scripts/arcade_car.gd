@@ -36,7 +36,7 @@ func _physics_process(delta: float) -> void:
 
 	engine_force = requested_engine * MAX_ENGINE_FORCE
 	brake = requested_brake * MAX_BRAKE_FORCE
-	steering = move_toward(steering, steering_input * MAX_STEERING, STEERING_SPEED * delta)
+	steering = move_toward(steering, -steering_input * MAX_STEERING, STEERING_SPEED * delta)
 
 	if global_position.y < -8.0 or abs(global_position.x) > 55.0:
 		reset_to_spawn()
