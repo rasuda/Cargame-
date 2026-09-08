@@ -1,7 +1,7 @@
 class_name GameHud
 extends Control
 
-const VERSION := "v0.2.3 GODOT"
+const VERSION := "v0.2.4 GODOT"
 
 var title_label: Label
 var speed_label: Label
@@ -94,15 +94,15 @@ func _build_controls() -> void:
 		glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		glyph.add_theme_font_size_override("font_size", 34)
+		glyph.add_theme_font_size_override("font_size", 44)
 		panel.add_child(glyph)
 
 
 func _layout() -> void:
 	var viewport_size := size
 	var margin := clampf(viewport_size.x * 0.035, 18.0, 38.0)
-	var button_size := clampf(viewport_size.x * 0.11, 72.0, 104.0)
-	var gap := clampf(button_size * 0.22, 14.0, 22.0)
+	var button_size := clampf(viewport_size.x * 0.16, 108.0, 150.0)
+	var gap := clampf(button_size * 0.16, 16.0, 24.0)
 	var bottom := viewport_size.y - margin
 
 	title_label.position = Vector2(margin, margin)

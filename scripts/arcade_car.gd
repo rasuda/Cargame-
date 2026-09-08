@@ -1,10 +1,10 @@
 class_name ArcadeCar
 extends VehicleBody3D
 
-const MAX_ENGINE_FORCE := 3200.0
-const MAX_BRAKE_FORCE := 110.0
-const MAX_STEERING := deg_to_rad(28.0)
-const STEERING_SPEED := 4.5
+const MAX_ENGINE_FORCE := 1600.0
+const MAX_BRAKE_FORCE := 80.0
+const MAX_STEERING := deg_to_rad(20.0)
+const STEERING_SPEED := 2.5
 
 var throttle_input := 0.0
 var brake_input := 0.0
