@@ -62,8 +62,8 @@ export class ArcadeCar {
     const lateralSpeed = Vector3.Dot(this.velocity, right);
 
     if (this.input.throttle > 0 && forwardSpeed < GAME_CONFIG.car.maxSpeed) {
-      body.applyForce(
-        forward.scale(GAME_CONFIG.car.acceleration * this.input.throttle),
+      body.applyImpulse(
+        forward.scale(GAME_CONFIG.car.acceleration * this.input.throttle * deltaSeconds),
         this.mesh.getAbsolutePosition(),
       );
     }
@@ -73,12 +73,12 @@ export class ArcadeCar {
         ? -GAME_CONFIG.car.brakeForce
         : -GAME_CONFIG.car.reverseAcceleration;
       if (forwardSpeed > -GAME_CONFIG.car.maxReverseSpeed) {
-        body.applyForce(forward.scale(force), this.mesh.getAbsolutePosition());
+        body.applyImpulse(forward.scale(force * deltaSeconds), this.mesh.getAbsolutePosition());
       }
     }
 
-    const gripForce = right.scale(-lateralSpeed * GAME_CONFIG.car.lateralGrip);
-    body.applyForce(gripForce, this.mesh.getAbsolutePosition());
+    const gripImpulse = right.scale(-lateralSpeed * GAME_CONFIG.car.lateralGrip * deltaSeconds);
+    body.applyImpulse(gripImpulse, this.mesh.getAbsolutePosition());
 
     const speedRatio = Math.min(Math.abs(forwardSpeed) / 8, 1);
     const steeringDirection = forwardSpeed >= -0.2 ? 1 : -1;
@@ -88,8 +88,8 @@ export class ArcadeCar {
       * steeringDirection;
     body.setAngularVelocity(this.angularVelocity);
 
-    body.applyForce(
-      new Vector3(0, -GAME_CONFIG.car.downforce * Math.abs(forwardSpeed), 0),
+    body.applyImpulse(
+      new Vector3(0, -GAME_CONFIG.car.downforce * Math.abs(forwardSpeed) * deltaSeconds, 0),
       this.mesh.getAbsolutePosition(),
     );
 
