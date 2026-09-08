@@ -62,6 +62,7 @@ export class Game {
         const position = car.mesh.position;
         debugPanel.textContent = [
           this.input.debugText,
+          "propulsão: impulso/quadro",
           `velocidade: ${car.forwardSpeed.toFixed(3)} m/s`,
           `posição: ${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`,
         ].join("\n");
