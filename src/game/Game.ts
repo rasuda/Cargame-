@@ -33,7 +33,7 @@ export class Game {
 
     const { camera, shadow } = createScene(scene);
     const car = new ArcadeCar(scene, this.input);
-    shadow.addShadowCaster(car.mesh);
+    for (const visualMesh of car.mesh.getChildMeshes()) shadow.addShadowCaster(visualMesh);
 
     this.scene = scene;
     this.car = car;
@@ -64,6 +64,7 @@ export class Game {
           this.input.debugText,
           "propulsão: impulso/quadro",
           `atrito carroceria: ${GAME_CONFIG.car.bodyFriction.toFixed(2)}`,
+          "colisor: alinhado aos pneus",
           `velocidade: ${car.forwardSpeed.toFixed(3)} m/s`,
           `posição: ${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`,
         ].join("\n");
