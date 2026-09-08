@@ -2,6 +2,7 @@ export const GAME_CONFIG = {
   gravity: -9.81,
   car: {
     mass: 900,
+    bodyFriction: 0.08,
     acceleration: 8_500,
     reverseAcceleration: 4_000,
     brakeForce: 13_000,
