@@ -50,6 +50,7 @@ func set_controls(new_throttle: float, new_brake: float, new_steering: float) ->
 
 func reset_to_spawn() -> void:
 	global_transform = spawn_transform
+	reset_physics_interpolation()
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	engine_force = 0.0

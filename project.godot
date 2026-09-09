@@ -52,6 +52,7 @@ toggle_debug={
 
 3d/default_gravity=14.0
 common/physics_ticks_per_second=60
+common/physics_interpolation=true
 
 [rendering]
 

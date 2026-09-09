@@ -1,7 +1,7 @@
 class_name GameHud
 extends Control
 
-const VERSION := "v0.2.5 GODOT"
+const VERSION := "v0.2.6 GODOT"
 
 var title_label: Label
 var speed_label: Label

@@ -95,9 +95,10 @@ func _cycle_camera() -> void:
 
 
 func _update_camera(delta: float) -> void:
-	var target := car.global_position + Vector3.UP * 1.1
+	var car_transform := car.get_global_transform_interpolated()
+	var target := car_transform.origin + Vector3.UP * 1.1
 	var local_offset := Vector3(sin(camera_yaw) * camera_distance, 3.1 + sin(camera_pitch) * 3.0, -cos(camera_yaw) * camera_distance)
-	var world_offset := car.global_transform.basis * local_offset
+	var world_offset := car_transform.basis * local_offset
 	var desired := target + world_offset
 	camera.global_position = camera.global_position.lerp(desired, 1.0 - exp(-7.0 * delta))
 	camera.look_at(target, Vector3.UP)
@@ -106,6 +107,7 @@ func _update_camera(delta: float) -> void:
 func _build_car() -> void:
 	car = ArcadeCar.new()
 	car.name = "PlayerCar"
+	car.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	car.position = Vector3(0.0, 0.42, -30.0)
 	add_child(car)
 
@@ -115,6 +117,7 @@ func _build_camera() -> void:
 	camera.name = "FollowCamera"
 	camera.fov = 62.0
 	camera.near = 0.08
+	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	camera.position = car.position + Vector3(0.0, 4.0, -9.0)
 	add_child(camera)
 	camera.current = true
