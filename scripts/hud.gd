@@ -1,7 +1,7 @@
 class_name GameHud
 extends Control
 
-const VERSION := "v0.2.6 GODOT"
+const VERSION := "v0.2.7 GODOT"
 
 var title_label: Label
 var speed_label: Label
@@ -22,9 +22,9 @@ func _ready() -> void:
 	_layout()
 
 
-func set_telemetry(speed: float, ground_count: int, throttle: float, brake_value: float, steer: float, touches: int, camera_degrees: float) -> void:
+func set_telemetry(speed: float, ground_count: int, throttle: float, brake_value: float, steer: float, steering_degrees: float, touches: int, camera_degrees: float) -> void:
 	speed_label.text = "%d\nkm/h" % roundi(speed)
-	debug_label.text = "DEBUG  |  touch:%d\nentrada  T:%.0f  B:%.0f  S:%+.0f\nrodas no chão: %d/4\nvelocidade: %.2f km/h\ncâmera: %.0f°" % [touches, throttle, brake_value, steer, ground_count, speed, camera_degrees]
+	debug_label.text = "DEBUG  |  touch:%d\nentrada  T:%.0f  B:%.0f  S:%+.0f\nvolante: %+.1f°\nrodas no chão: %d/4\nvelocidade: %.2f km/h\ncâmera: %.0f°" % [touches, throttle, brake_value, steer, steering_degrees, ground_count, speed, camera_degrees]
 
 
 func action_at(point: Vector2) -> String:

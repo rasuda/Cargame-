@@ -4,13 +4,15 @@ extends VehicleBody3D
 const MAX_ENGINE_FORCE := 1600.0
 const MAX_BRAKE_FORCE := 80.0
 const MAX_STEERING := deg_to_rad(20.0)
-const STEERING_SPEED := 2.5
+const STEERING_INPUT_SPEED := deg_to_rad(24.0)
+const STEERING_RETURN_SPEED := deg_to_rad(45.0)
 
 var throttle_input := 0.0
 var brake_input := 0.0
 var steering_input := 0.0
 var spawn_transform := Transform3D.IDENTITY
 var wheels: Array[VehicleWheel3D] = []
+var reset_requested := false
 
 
 func _ready() -> void:
@@ -36,7 +38,9 @@ func _physics_process(delta: float) -> void:
 
 	engine_force = requested_engine * MAX_ENGINE_FORCE
 	brake = requested_brake * MAX_BRAKE_FORCE
-	steering = move_toward(steering, -steering_input * MAX_STEERING, STEERING_SPEED * delta)
+	var steering_target := -steering_input * MAX_STEERING
+	var steering_speed := STEERING_INPUT_SPEED if absf(steering_input) > 0.01 else STEERING_RETURN_SPEED
+	steering = move_toward(steering, steering_target, steering_speed * delta)
 
 	if global_position.y < -8.0 or abs(global_position.x) > 55.0:
 		reset_to_spawn()
@@ -49,13 +53,21 @@ func set_controls(new_throttle: float, new_brake: float, new_steering: float) ->
 
 
 func reset_to_spawn() -> void:
-	global_transform = spawn_transform
-	reset_physics_interpolation()
-	linear_velocity = Vector3.ZERO
-	angular_velocity = Vector3.ZERO
+	reset_requested = true
 	engine_force = 0.0
 	brake = 0.0
 	sleeping = false
+
+
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	if not reset_requested:
+		return
+	state.transform = spawn_transform
+	state.linear_velocity = Vector3.ZERO
+	state.angular_velocity = Vector3.ZERO
+	steering = 0.0
+	reset_requested = false
+	reset_physics_interpolation()
 
 
 func speed_kmh() -> float:

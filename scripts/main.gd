@@ -39,7 +39,7 @@ func _process(delta: float) -> void:
 		hud.toggle_debug()
 
 	_update_camera(delta)
-	hud.set_telemetry(car.speed_kmh(), car.grounded_wheels(), throttle, brake_value, steer, touch_actions.size(), rad_to_deg(camera_yaw))
+	hud.set_telemetry(car.speed_kmh(), car.grounded_wheels(), throttle, brake_value, steer, rad_to_deg(car.steering), touch_actions.size(), rad_to_deg(camera_yaw))
 
 
 func _input(event: InputEvent) -> void:
