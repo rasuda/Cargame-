@@ -13,11 +13,15 @@ var touch_actions: Dictionary = {}
 var camera_touch := -1
 var camera_touch_origin := Vector2.ZERO
 var camera_touch_distance := 0.0
+var traffic: Array[TrafficCar] = []
+var involved_vehicles: Dictionary = {}
+var crash_score := 0
 
 
 func _ready() -> void:
 	_build_environment()
 	_build_track()
+	_build_traffic()
 	_build_car()
 	_build_camera()
 	_build_hud()
@@ -32,7 +36,7 @@ func _process(delta: float) -> void:
 	car.set_controls(throttle, brake_value, steer)
 
 	if Input.is_action_just_pressed("reset_car"):
-		car.reset_to_spawn()
+		_reset_game()
 	if Input.is_action_just_pressed("cycle_camera"):
 		_cycle_camera()
 	if Input.is_action_just_pressed("toggle_debug"):
@@ -40,6 +44,7 @@ func _process(delta: float) -> void:
 
 	_update_camera(delta)
 	hud.set_telemetry(car.speed_kmh(), car.grounded_wheels(), throttle, brake_value, steer, rad_to_deg(car.steering), touch_actions.size(), rad_to_deg(camera_yaw))
+	hud.set_crash_stats(involved_vehicles.size(), traffic.size(), crash_score)
 
 
 func _input(event: InputEvent) -> void:
@@ -56,7 +61,7 @@ func _handle_screen_touch(event: InputEventScreenTouch) -> void:
 	if event.pressed:
 		var action := hud.action_at(event.position)
 		if action == "reset":
-			car.reset_to_spawn()
+			_reset_game()
 			get_viewport().set_input_as_handled()
 		elif action != "":
 			touch_actions[event.index] = action
@@ -110,6 +115,39 @@ func _build_car() -> void:
 	car.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	car.position = Vector3(0.0, 0.42, -30.0)
 	add_child(car)
+
+
+func _build_traffic() -> void:
+	var colors := [Color("3e7bc4"), Color("d84a3c"), Color("d7b632"), Color("58636f"), Color("f0f1ed"), Color("6a4b91")]
+	var starts := [-31.0, -13.0, 6.0, 31.0, 13.0, -6.0]
+	for index in range(6):
+		var vehicle := TrafficCar.new()
+		vehicle.name = "TrafficCar%d" % (index + 1)
+		vehicle.cruise_direction = 1.0 if index < 3 else -1.0
+		vehicle.cruise_speed = 8.0 + float(index % 3) * 1.15
+		vehicle.body_color = colors[index]
+		var lane_z := 19.3 if index < 3 else 24.7
+		vehicle.position = Vector3(starts[index], 0.42, lane_z)
+		vehicle.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
+		vehicle.crash_involved.connect(_on_traffic_crash)
+		add_child(vehicle)
+		traffic.append(vehicle)
+
+
+func _on_traffic_crash(vehicle: TrafficCar) -> void:
+	var vehicle_id := vehicle.get_instance_id()
+	if involved_vehicles.has(vehicle_id):
+		return
+	involved_vehicles[vehicle_id] = true
+	crash_score += 1000 * involved_vehicles.size()
+
+
+func _reset_game() -> void:
+	car.reset_to_spawn()
+	involved_vehicles.clear()
+	crash_score = 0
+	for vehicle in traffic:
+		vehicle.reset_traffic()
 
 
 func _build_camera() -> void:
@@ -177,7 +215,7 @@ func _build_track() -> void:
 		_add_visual_box(Vector3(0.75, 0.028, 2.4), Vector3(float(stripe), 0.032, 14.4), Color("f1efe5"))
 		_add_visual_box(Vector3(0.75, 0.028, 2.4), Vector3(float(stripe), 0.032, 29.6), Color("f1efe5"))
 
-	var ramp := _add_static_box("Ramp", Vector3(4.8, 0.38, 9.0), Vector3(0.0, 0.72, 49.0), Color("66707e"), Vector3(deg_to_rad(-10.0), 0.0, 0.0))
+	var ramp := _add_static_box("Ramp", Vector3(4.8, 0.38, 9.0), Vector3(0.0, 0.72, 8.0), Color("66707e"), Vector3(deg_to_rad(-10.0), 0.0, 0.0))
 	_add_box_child(ramp, Vector3(0.20, 0.035, 8.4), Vector3(0.0, 0.21, 0.0), Color("f1c84b"))
 	_add_box_child(ramp, Vector3(0.20, 0.42, 9.0), Vector3(-2.30, 0.35, 0.0), Color("db6338"))
 	_add_box_child(ramp, Vector3(0.20, 0.42, 9.0), Vector3(2.30, 0.35, 0.0), Color("db6338"))
@@ -188,6 +226,8 @@ func _build_track() -> void:
 	for side in [-1.0, 1.0]:
 		var building_index := 0
 		for z in range(-25, 92, 16):
+			if z >= 15 and z <= 29:
+				continue
 			var height := 5.0 + float((building_index * 3 + (1 if side > 0.0 else 0)) % 6)
 			var color: Color = building_colors[(building_index + (2 if side > 0.0 else 0)) % building_colors.size()]
 			var building := _add_static_box("Building", Vector3(5.4, height, 10.5), Vector3(side * 11.1, height * 0.5, float(z)), color)
@@ -199,8 +239,8 @@ func _build_track() -> void:
 					_add_box_child(building, Vector3(0.055, 0.62, 1.35), Vector3(road_face_x, window_y, window_z), Color("b9d9e8"))
 			building_index += 1
 
-	_add_static_box("BarrierLeft", Vector3(2.8, 0.75, 1.0), Vector3(-3.2, 0.38, 18.0), Color("ef6b32"))
-	_add_static_box("BarrierRight", Vector3(2.8, 0.75, 1.0), Vector3(3.2, 0.38, 26.0), Color("be4338"))
+	_add_static_box("BarrierLeft", Vector3(2.8, 0.75, 1.0), Vector3(-4.4, 0.38, 39.0), Color("ef6b32"))
+	_add_static_box("BarrierRight", Vector3(2.8, 0.75, 1.0), Vector3(4.4, 0.38, 44.0), Color("be4338"))
 
 
 func _add_static_box(node_name: String, box_size: Vector3, box_position: Vector3, color: Color, box_rotation := Vector3.ZERO) -> StaticBody3D:

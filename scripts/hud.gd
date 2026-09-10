@@ -1,12 +1,13 @@
 class_name GameHud
 extends Control
 
-const VERSION := "v0.3.1 GODOT"
+const VERSION := "v0.4.0 CRASH MODE"
 
 var title_label: Label
 var speed_label: Label
 var debug_label: Label
 var reset_label: Label
+var crash_label: Label
 var debug_visible := true
 var control_rects: Dictionary = {}
 var control_panels: Dictionary = {}
@@ -25,6 +26,10 @@ func _ready() -> void:
 func set_telemetry(speed: float, ground_count: int, throttle: float, brake_value: float, steer: float, steering_degrees: float, touches: int, camera_degrees: float) -> void:
 	speed_label.text = "%d\nkm/h" % roundi(speed)
 	debug_label.text = "DEBUG  |  touch:%d\nentrada  T:%.0f  B:%.0f  S:%+.0f\nvolante: %+.1f°\nrodas no chão: %d/4\nvelocidade: %.2f km/h\ncâmera: %.0f°" % [touches, throttle, brake_value, steer, steering_degrees, ground_count, speed, camera_degrees]
+
+
+func set_crash_stats(involved: int, total: int, score: int) -> void:
+	crash_label.text = "ACIDENTE  %d/%d\n%d PONTOS" % [involved, total, score]
 
 
 func action_at(point: Vector2) -> String:
@@ -84,6 +89,15 @@ func _build_labels() -> void:
 	reset_label.add_theme_stylebox_override("normal", _panel_style(Color(0.04, 0.08, 0.15, 0.78), 14.0, 2.0))
 	add_child(reset_label)
 
+	crash_label = Label.new()
+	crash_label.text = "ACIDENTE  0/6\n0 PONTOS"
+	crash_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crash_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	crash_label.add_theme_font_size_override("font_size", 15)
+	crash_label.add_theme_color_override("font_color", Color("ffe08a"))
+	crash_label.add_theme_stylebox_override("normal", _panel_style(Color(0.10, 0.07, 0.04, 0.82), 12.0, 2.0, Color("e8a93b")))
+	add_child(crash_label)
+
 
 func _build_controls() -> void:
 	for action in ["left", "right", "brake", "accelerate"]:
@@ -119,6 +133,8 @@ func _layout() -> void:
 	reset_label.position = Vector2(viewport_size.x - margin - reset_width, margin)
 	reset_label.size = Vector2(reset_width, 58)
 	control_rects["reset"] = Rect2(reset_label.position, reset_label.size)
+	crash_label.position = Vector2(viewport_size.x * 0.5 - 76.0, margin + 105.0)
+	crash_label.size = Vector2(152.0, 58.0)
 
 	var left_rect := Rect2(Vector2(margin, bottom - button_size), Vector2.ONE * button_size)
 	var right_rect := Rect2(Vector2(margin + button_size + gap, bottom - button_size), Vector2.ONE * button_size)
@@ -134,7 +150,7 @@ func _layout() -> void:
 		control_panels[action].position = rect.position
 		control_panels[action].size = rect.size
 
-	debug_label.position = Vector2(margin, margin + 86)
+	debug_label.position = Vector2(margin, margin + 176)
 	debug_label.size = Vector2(minf(370.0, viewport_size.x - margin * 2.0), 138)
 
 

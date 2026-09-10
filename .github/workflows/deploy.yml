@@ -55,8 +55,8 @@ jobs:
       - name: Export Web build
         run: |
           mkdir -p build/web
-          ./Godot_v${GODOT_RELEASE}_linux.x86_64 --headless --path . --export-release Web build/web/crash-circuit-0.3.1.html
-          cp build/web/crash-circuit-0.3.1.html build/web/index.html
+          ./Godot_v${GODOT_RELEASE}_linux.x86_64 --headless --path . --export-release Web build/web/crash-circuit-0.4.0.html
+          cp build/web/crash-circuit-0.4.0.html build/web/index.html
 
       - name: Disable Jekyll processing
         run: touch build/web/.nojekyll
