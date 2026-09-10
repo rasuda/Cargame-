@@ -192,7 +192,7 @@ func _build_track() -> void:
 			var color: Color = building_colors[(building_index + (2 if side > 0.0 else 0)) % building_colors.size()]
 			var building := _add_static_box("Building", Vector3(5.4, height, 10.5), Vector3(side * 11.1, height * 0.5, float(z)), color)
 			_add_box_child(building, Vector3(5.65, 0.30, 10.75), Vector3(0.0, height * 0.5 + 0.15, 0.0), color.lightened(0.13))
-			var road_face_x := -side * 2.72
+			var road_face_x: float = -float(side) * 2.72
 			for floor_index in range(maxi(2, int(height / 1.45))):
 				var window_y := -height * 0.5 + 1.0 + floor_index * 1.30
 				for window_z in [-3.1, 0.0, 3.1]:
