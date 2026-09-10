@@ -136,38 +136,68 @@ func _build_environment() -> void:
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = Color("78a9d8")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("cfe2ff")
-	environment.ambient_light_energy = 0.75
+	environment.ambient_light_color = Color("b9d2ee")
+	environment.ambient_light_energy = 0.48
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	world_environment.environment = environment
 	add_child(world_environment)
 
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-48.0, -28.0, 0.0)
-	sun.light_energy = 1.25
+	sun.light_energy = 0.95
 	sun.shadow_enabled = true
 	add_child(sun)
 
 
 func _build_track() -> void:
-	_add_static_box("Ground", Vector3(80.0, 0.2, 190.0), Vector3(0.0, -0.22, 35.0), Color("b9ec83"))
-	_add_static_box("Road", Vector3(13.0, 0.20, 180.0), Vector3(0.0, -0.10, 35.0), Color("737b8b"))
-	_add_static_box("CrossRoad", Vector3(70.0, 0.20, 13.0), Vector3(0.0, -0.09, 22.0), Color("737b8b"))
+	var asphalt := Color("343b49")
+	var sidewalk := Color("aeb2b5")
+	var curb := Color("e3e1d8")
+	_add_static_box("Ground", Vector3(80.0, 0.2, 190.0), Vector3(0.0, -0.22, 35.0), Color("76a85b"))
+	_add_static_box("Road", Vector3(13.0, 0.20, 180.0), Vector3(0.0, -0.10, 35.0), asphalt)
+	_add_static_box("CrossRoad", Vector3(70.0, 0.20, 13.0), Vector3(0.0, -0.09, 22.0), asphalt)
 
 	for z in range(-42, 105, 8):
-		_add_visual_box(Vector3(0.18, 0.025, 4.0), Vector3(0.0, 0.025, float(z)), Color.WHITE)
-
-	for z in [-16.0, 5.0, 46.0, 68.0]:
-		_add_visual_box(Vector3(0.16, 0.026, 7.0), Vector3(-6.0, 0.028, z), Color("ffd863"))
-		_add_visual_box(Vector3(0.16, 0.026, 7.0), Vector3(6.0, 0.028, z), Color("ffd863"))
-
-	_add_static_box("Ramp", Vector3(4.8, 0.38, 9.0), Vector3(0.0, 0.72, 49.0), Color("eeeeee"), Vector3(deg_to_rad(-10.0), 0.0, 0.0))
+		if z < 15 or z > 29:
+			_add_visual_box(Vector3(0.18, 0.025, 4.0), Vector3(0.0, 0.025, float(z)), Color("f5f3e8"))
 
 	for side in [-1.0, 1.0]:
-		for z in range(-25, 91, 16):
-			var height := 4.0 + float((z + 25) % 5)
-			var color := Color("b08f79") if side < 0.0 else Color("47536b")
-			_add_static_box("Building", Vector3(7.0, height, 10.0), Vector3(side * 11.0, height * 0.5, float(z)), color)
+		_add_visual_box(Vector3(0.14, 0.027, 70.0), Vector3(side * 6.05, 0.029, -19.5), Color("e8bd43"))
+		_add_visual_box(Vector3(0.14, 0.027, 96.0), Vector3(side * 6.05, 0.029, 77.0), Color("e8bd43"))
+		_add_static_box("SidewalkSouth", Vector3(1.75, 0.18, 70.0), Vector3(side * 7.45, 0.09, -19.5), sidewalk)
+		_add_static_box("SidewalkNorth", Vector3(1.75, 0.18, 96.0), Vector3(side * 7.45, 0.09, 77.0), sidewalk)
+		_add_visual_box(Vector3(0.16, 0.24, 70.0), Vector3(side * 6.58, 0.12, -19.5), curb)
+		_add_visual_box(Vector3(0.16, 0.24, 96.0), Vector3(side * 6.58, 0.12, 77.0), curb)
+
+		for z in range(-52, 126, 5):
+			if z < 15 or z > 29:
+				_add_visual_box(Vector3(1.64, 0.016, 0.045), Vector3(side * 7.45, 0.19, float(z)), Color("7e848b"))
+
+	for stripe in range(-5, 6, 2):
+		_add_visual_box(Vector3(0.75, 0.028, 2.4), Vector3(float(stripe), 0.032, 14.4), Color("f1efe5"))
+		_add_visual_box(Vector3(0.75, 0.028, 2.4), Vector3(float(stripe), 0.032, 29.6), Color("f1efe5"))
+
+	var ramp := _add_static_box("Ramp", Vector3(4.8, 0.38, 9.0), Vector3(0.0, 0.72, 49.0), Color("66707e"), Vector3(deg_to_rad(-10.0), 0.0, 0.0))
+	_add_box_child(ramp, Vector3(0.20, 0.035, 8.4), Vector3(0.0, 0.21, 0.0), Color("f1c84b"))
+	_add_box_child(ramp, Vector3(0.20, 0.42, 9.0), Vector3(-2.30, 0.35, 0.0), Color("db6338"))
+	_add_box_child(ramp, Vector3(0.20, 0.42, 9.0), Vector3(2.30, 0.35, 0.0), Color("db6338"))
+	for ramp_mark in [-3.2, -1.6, 0.0, 1.6, 3.2]:
+		_add_box_child(ramp, Vector3(4.35, 0.025, 0.08), Vector3(0.0, 0.215, ramp_mark), Color("8994a1"))
+
+	var building_colors := [Color("916f62"), Color("5d6b82"), Color("866f86"), Color("657b72"), Color("9a8064")]
+	for side in [-1.0, 1.0]:
+		var building_index := 0
+		for z in range(-25, 92, 16):
+			var height := 5.0 + float((building_index * 3 + (1 if side > 0.0 else 0)) % 6)
+			var color: Color = building_colors[(building_index + (2 if side > 0.0 else 0)) % building_colors.size()]
+			var building := _add_static_box("Building", Vector3(5.4, height, 10.5), Vector3(side * 11.1, height * 0.5, float(z)), color)
+			_add_box_child(building, Vector3(5.65, 0.30, 10.75), Vector3(0.0, height * 0.5 + 0.15, 0.0), color.lightened(0.13))
+			var road_face_x := -side * 2.72
+			for floor_index in range(maxi(2, int(height / 1.45))):
+				var window_y := -height * 0.5 + 1.0 + floor_index * 1.30
+				for window_z in [-3.1, 0.0, 3.1]:
+					_add_box_child(building, Vector3(0.055, 0.62, 1.35), Vector3(road_face_x, window_y, window_z), Color("b9d9e8"))
+			building_index += 1
 
 	_add_static_box("BarrierLeft", Vector3(2.8, 0.75, 1.0), Vector3(-3.2, 0.38, 18.0), Color("ef6b32"))
 	_add_static_box("BarrierRight", Vector3(2.8, 0.75, 1.0), Vector3(3.2, 0.38, 26.0), Color("be4338"))
@@ -197,13 +227,21 @@ func _add_visual_box(box_size: Vector3, box_position: Vector3, color: Color) -> 
 	add_child(visual)
 
 
+func _add_box_child(parent: Node3D, box_size: Vector3, box_position: Vector3, color: Color) -> MeshInstance3D:
+	var visual := _mesh_box(box_size, color)
+	visual.position = box_position
+	parent.add_child(visual)
+	return visual
+
+
 func _mesh_box(box_size: Vector3, color: Color) -> MeshInstance3D:
 	var instance := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
 	mesh.size = box_size
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
-	material.roughness = 0.86
+	material.roughness = 0.94
+	material.metallic_specular = 0.18
 	mesh.material = material
 	instance.mesh = mesh
 	return instance
